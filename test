@@ -18,6 +18,4 @@ if [ "$current_version" != "$required_version" ]; then
     exit 1
 fi
 
-cp /etc/X11/twm/system.twmrc $HOME/.twmrc
-
 echo "NetBSD Rocks!"
