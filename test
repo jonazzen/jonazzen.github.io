@@ -19,7 +19,7 @@ if [ "$current_version" != "$required_version" ]; then
 fi
 
 mkdir -p ~/.config/awesome/
-cp /usr/pkg/share/awesome/rc.lua  ~/.config/awesome/
+cp /usr/pkg/etc/xdg/awesome/rc.lua  ~/.config/awesome/
 
 echo 'exec awesome' > ~/.xinitrc
 
