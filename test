@@ -18,6 +18,6 @@ if [ "$current_version" != "$required_version" ]; then
     exit 1
 fi
 
-echo 'exec TEST' > ~/.xinitrc
+echo 'exec TEST' >> ~/.xinitrc
 
 echo "NetBSD Rocks!"
