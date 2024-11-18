@@ -18,6 +18,9 @@ if [ "$current_version" != "$required_version" ]; then
     exit 1
 fi
 
-echo 'exec TEST' >> ~/.xinitrc
+mkdir -p ~/.config/awesome/
+cp /etc/xdg/awesome/rc.lua ~/.config/awesome/
+
+echo 'exec awesome' > ~/.xinitrc
 
 echo "NetBSD Rocks!"
