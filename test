@@ -1,6 +1,14 @@
 #!/bin/sh
 
-#set -eu
+set -eu
+
+# Get the kernel information
+kernel_info=$(uname -a)
+
+# Define the version or pattern to check for
+required_version="10.0"
+echo $required_version
+exit 1
 
 if [ ! -f /etc/release ]; then
     echo "$(tput setaf 1)Error: Unable to determine NetBSD version. /etc/release file not found."
