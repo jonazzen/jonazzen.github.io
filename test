@@ -1,0 +1,21 @@
+#!/bin/sh
+
+set -eu
+
+if [ ! -f /etc/release ]; then
+    echo "$(tput setaf 1)Error: Unable to determine NetBSD version. /etc/release file not found."
+    echo "Installation stopped."
+    exit 1
+fi
+
+. /etc/release
+
+if [ "$NETBSD_OFFICIAL_RELEASE" != "yes" ] || [ $(echo "$DISTRIBVER >= 10.0" | bc) != 1 ]; then
+    echo "$(tput setaf 1)Error: OS requirement not met"
+    echo "You are currently running: NetBSD $DISTRIBVER"
+    echo "OS required: NetBSD 10.0"
+    echo "Installation stopped."
+    exit 1
+fi
+
+echo "NetBSD Rocks!"
