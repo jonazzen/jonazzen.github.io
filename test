@@ -2,27 +2,19 @@
 
 set -eu
 
-# Get the kernel information
-kernel_info=$(uname -a)
+current_os=$(uname)
+current_version=$(uname -r)
 
-# Define the version or pattern to check for
+required_os="NetBSD"
 required_version="10.0"
-echo $required_version
-exit 1
 
-if [ ! -f /etc/release ]; then
-    echo "$(tput setaf 1)Error: Unable to determine NetBSD version. /etc/release file not found."
-    echo "Installation stopped."
+if [ "$current_os" != "$required_os" ]; then
+    echo "$(tput setaf 1)Wrong OS: Expected $required_os, but found $current_os"
     exit 1
 fi
 
-. /etc/release
-
-if [ "$NETBSD_OFFICIAL_RELEASE" != "yes" ] || [ $(echo "$DISTRIBVER >= 10.0" | bc) != 1 ]; then
-    echo "$(tput setaf 1)Error: OS requirement not met"
-    echo "You are currently running: NetBSD $DISTRIBVER"
-    echo "OS required: NetBSD 10.0"
-    echo "Installation stopped."
+if [ "$current_version" != "$required_version" ]; then
+    echo "$(tput setaf 1)Wrong version: Expected $required_version, but found $current_version"
     exit 1
 fi
 
