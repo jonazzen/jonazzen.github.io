@@ -25,8 +25,6 @@ cd progman
 make install
 cd
 
-exit
-
 echo 'exec progman' > ~/.xinitrc
 
 echo "NetBSD Rocks!"
