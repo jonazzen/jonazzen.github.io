@@ -18,14 +18,14 @@ if [ "$current_version" != "$required_version" ]; then
     exit 1
 fi
 
-su
 pkgin install git 
-exit
 
 git clone https://github.com/jcs/progman.git
 cd progman
 make install
 cd
+
+exit
 
 echo 'exec progman' > ~/.xinitrc
 
