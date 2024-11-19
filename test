@@ -18,9 +18,15 @@ if [ "$current_version" != "$required_version" ]; then
     exit 1
 fi
 
-mkdir -p ~/.config/awesome/
-cp /usr/pkg/etc/xdg/awesome/rc.lua  ~/.config/awesome/
+su
+pkgin install git 
+exit
 
-echo 'exec awesome' > ~/.xinitrc
+git clone https://github.com/jcs/progman.git
+cd progman
+make install
+cd
+
+echo 'exec progman' > ~/.xinitrc
 
 echo "NetBSD Rocks!"
