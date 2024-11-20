@@ -18,13 +18,7 @@ if [ "$current_version" != "$required_version" ]; then
     exit 1
 fi
 
-git clone https://github.com/jcs/progman.git
-cd progman
-make install
-cd
-
-echo 'exec progman' > ~/.xinitrc
+echo 'PS1='\[\e[1;34m\]\u\[\e[0m\]@\[\e[1;32m\]\h \[\e[0;33m\]\w \[\e[1;31m\]$ \[\e[0m\]'
+' > ~/.shrc
 
 echo "NetBSD Rocks!"
-
-PS1='\[\e[1;34m\]\u\[\e[0m\]@\[\e[1;32m\]\h \[\e[0;33m\]\w \[\e[1;31m\]$ \[\e[0m\]'
