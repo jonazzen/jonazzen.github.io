@@ -18,4 +18,7 @@ if [ "$current_version" != "$required_version" ]; then
     exit 1
 fi
 
+pkg update
+pkg install git
+
 echo "FreeBSD Rocks!"
