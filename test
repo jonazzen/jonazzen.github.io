@@ -6,7 +6,7 @@ current_os=$(uname)
 current_version=$(uname -r)
 
 required_os="FreeBSD"
-required_version="14.1"
+required_version="14.1-RELEASE"
 
 if [ "$current_os" != "$required_os" ]; then
     echo "$(tput setaf 1)Wrong OS: Expected $required_os, but found $current_os"
