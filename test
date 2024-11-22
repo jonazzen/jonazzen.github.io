@@ -5,8 +5,8 @@ set -eu
 current_os=$(uname)
 current_version=$(uname -r)
 
-required_os="NetBSD"
-required_version="10.0"
+required_os="FreeBSD"
+required_version="14.1"
 
 if [ "$current_os" != "$required_os" ]; then
     echo "$(tput setaf 1)Wrong OS: Expected $required_os, but found $current_os"
@@ -18,7 +18,4 @@ if [ "$current_version" != "$required_version" ]; then
     exit 1
 fi
 
-echo 'PS1='\[\e[1;34m\]\u\[\e[0m\]@\[\e[1;32m\]\h \[\e[0;33m\]\w \[\e[1;31m\]$ \[\e[0m\]'
-' > ~/.shrc
-
-echo "NetBSD Rocks!"
+echo "FreeBSD Rocks!"
