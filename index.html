@@ -1,11 +1,1135 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Jonas Emil Sommer</title>
-	<link rel="icon" type="image/x-icon" href="favicon.ico">
-  </head>
+  <meta charset="UTF-8">
+  <title>Cloud OS</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <style>
+    :root {
+      --zoom: 1;
+      --bg: #0d1117;
+      --surface: rgba(255,255,255,0.06);
+      --surface2: rgba(255,255,255,0.1);
+      --text: #e6edf3;
+      --accent-blue: #58a6ff;
+      --accent-green: #58cc58;
+      --accent-purple: #b86ff5;
+      --accent-orange: #ff9558;
+      --accent-pink: #ff8ac0;
+      --accent-dark-blue: #1a5fb4;
+      --accent-dark-green: #2b8a3e;
+      --accent-dark-purple: #7a39b9;
+      --accent-dark-red: #b33030;
+      --accent-dark-teal: #0f7a7a;
+      --accent: var(--accent-dark-blue);
+      --border: rgba(255,255,255,0.15);
+      --shadow: 0 8px 16px rgba(0,0,0,0.3);
+      --window-bg: rgba(30,30,46,0.96);
+      --icon-color: #e6edf3;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body, html {
+      height:100%;
+      overflow:hidden;
+      font-family:'Inter', sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      font-size: calc(12px * var(--zoom));
+    }
+    #desktop {
+      position: absolute;
+      inset: 0;
+      padding-bottom: calc(50px * var(--zoom));
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      transition: background-image 0.3s ease;
+      transform: scale(var(--zoom));
+      transform-origin: 0 0;
+      width: calc(100% / var(--zoom));
+      height: calc(100% / var(--zoom));
+    }
+    i, .task-icon i, .start-tile i, .titlebar-icon, #taskbar-clock, .file-item i, .back-btn i {
+      color: var(--icon-color) !important;
+    }
+    /* Taskbar */
+    #taskbar {
+      position: fixed;
+      bottom: calc(8px * var(--zoom));
+      left: 50%;
+      transform: translateX(-50%) scale(var(--zoom));
+      transform-origin: bottom center;
+      height: calc(40px * var(--zoom));
+      padding: 0 calc(16px * var(--zoom));
+      border-radius: calc(14px * var(--zoom));
+      gap: calc(12px * var(--zoom));
+      background: rgba(30,30,46,0.94);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      z-index: 10000;
+    }
+    #taskbar.windows {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: calc(32px * var(--zoom));
+      padding: 0;
+      border-radius: 0;
+      transform: none;
+      justify-content: flex-start;
+      gap: calc(4px * var(--zoom));
+      padding-left: calc(8px * var(--zoom));
+      background: rgba(30, 30, 46, 0.98);
+    }
+    #taskbar.windows .task-icon {
+      width: calc(30px * var(--zoom));
+      height: calc(30px * var(--zoom));
+      border-radius: calc(5px * var(--zoom));
+      margin: calc(1px * var(--zoom)) 0;
+    }
+    #taskbar.windows #about-btn {
+      order: -1;
+    }
+    #taskbar.windows #taskbar-clock {
+      margin-left: auto;
+      margin-right: calc(8px * var(--zoom));
+    }
+    .task-icon {
+      position: relative;
+      width: calc(36px * var(--zoom));
+      height: calc(36px * var(--zoom));
+      border-radius: calc(10px * var(--zoom));
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-size: calc(16px * var(--zoom));
+    }
+    .task-icon:hover {
+      background: var(--accent);
+      color: white !important;
+      transform: scale(1.05);
+    }
+    .task-icon.open {
+      background: var(--accent);
+      color: white !important;
+    }
+    .task-icon.minimized {
+      border: 1px solid var(--accent) !important;
+      opacity: 0.7;
+      background: var(--surface) !important;
+      color: var(--icon-color) !important;
+    }
+    #taskbar-clock {
+      margin-left: calc(8px * var(--zoom));
+      font-size: calc(12px * var(--zoom));
+      font-weight: 600;
+      font-family: monospace;
+    }
+    /* Windows */
+    .window {
+      position: absolute;
+      background: var(--window-bg);
+      backdrop-filter: blur(12px);
+      border-radius: calc(10px * var(--zoom));
+      overflow: hidden;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      min-width: calc(240px * var(--zoom));
+      min-height: calc(180px * var(--zoom));
+      width: calc(400px * var(--zoom));
+      height: calc(320px * var(--zoom));
+      transition: all 0.15s ease;
+      transform: scale(var(--zoom));
+      transform-origin: 0 0;
+    }
+    .window.maximized {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      border-radius: 0 !important;
+      transform: none !important;
+    }
+    .titlebar {
+      padding: calc(6px * var(--zoom)) calc(10px * var(--zoom));
+      background: rgba(255, 255, 255, 0.04);
+      cursor: move;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 600;
+      user-select: none;
+      font-size: calc(12px * var(--zoom));
+      height: calc(28px * var(--zoom));
+    }
+    .titlebar-icon {
+      margin-right: calc(6px * var(--zoom));
+      font-size: calc(14px * var(--zoom));
+    }
+    .titlebar-buttons button {
+      width: calc(22px * var(--zoom));
+      height: calc(22px * var(--zoom));
+      border: none;
+      border-radius: 50%;
+      background: transparent;
+      color: var(--icon-color);
+      font-size: calc(12px * var(--zoom));
+      cursor: pointer;
+      transition: 0.1s;
+      margin-left: calc(2px * var(--zoom));
+    }
+    .titlebar-buttons button:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+    .window.active .titlebar {
+      background: var(--accent) !important;
+      color: white !important;
+    }
+    .content {
+      padding: calc(10px * var(--zoom));
+      height: calc(100% - (36px * var(--zoom)));
+      overflow: auto;
+      font-size: calc(12px * var(--zoom));
+    }
+    /* About App Styles */
+    .about-btn {
+      padding: calc(8px * var(--zoom)) calc(16px * var(--zoom));
+      background: var(--surface2);
+      border-radius: calc(6px * var(--zoom));
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: calc(6px * var(--zoom));
+      font-size: calc(12px * var(--zoom));
+      transition: 0.15s;
+    }
+    .about-btn:hover {
+      background: var(--accent);
+      color: white;
+    }
+    .about-btn i {
+      font-size: calc(12px * var(--zoom));
+    }
+    a.about-btn {
+       color: white;
+       text-decoration: none;
+    }
+    /* App Styles */
+    .file-item {
+      padding: calc(6px * var(--zoom));
+      border-radius: calc(8px * var(--zoom));
+      background: var(--surface);
+      margin: calc(6px * var(--zoom)) 0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: calc(8px * var(--zoom));
+      transition: 0.1s;
+    }
+    .file-item:hover {
+      background: var(--accent);
+      color: white;
+    }
+    .file-item i {
+      font-size: calc(14px * var(--zoom));
+    }
+    .back-btn {
+      background: var(--surface2);
+      padding: calc(6px * var(--zoom)) calc(10px * var(--zoom));
+      border-radius: calc(8px * var(--zoom));
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: calc(6px * var(--zoom));
+      margin-bottom: calc(8px * var(--zoom));
+      font-size: calc(10px * var(--zoom));
+    }
+    .calc-display {
+      padding: calc(10px * var(--zoom));
+      font-size: calc(20px * var(--zoom));
+      text-align: right;
+      background: #000;
+      color: #0f0;
+      border-radius: calc(8px * var(--zoom));
+      margin-bottom: calc(8px * var(--zoom));
+      font-family: monospace;
+    }
+    .calc-buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: calc(6px * var(--zoom));
+    }
+    .calc-btn {
+      padding: calc(10px * var(--zoom));
+      font-size: calc(14px * var(--zoom));
+      background: var(--surface2);
+      border-radius: calc(8px * var(--zoom));
+      cursor: pointer;
+      text-align: center;
+      transition: 0.1s;
+    }
+    .calc-btn:hover {
+      background: var(--accent);
+      color: white;
+    }
+    .calc-btn.zero {
+      grid-column: span 2;
+    }
+    /* Minesweeper Styles */
+    #minesweeper-controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: calc(8px * var(--zoom));
+      margin-bottom: calc(6px * var(--zoom));
+    }
+    #minesweeper-mines,
+    #minesweeper-time {
+      font-family: monospace;
+      font-size: calc(12px * var(--zoom));
+      font-weight: bold;
+      color: var(--text);
+    }
+    #minesweeper-face {
+      font-size: calc(14px * var(--zoom));
+      cursor: pointer;
+    }
+    #minesweeper-field {
+      margin: 0 auto;
+      border-spacing: 1px;
+    }
+    #minesweeper-field td {
+      width: calc(20px * var(--zoom));
+      height: calc(20px * var(--zoom));
+      background: #ccc;
+      border: 1px solid #999;
+      text-align: center;
+      vertical-align: middle;
+      cursor: pointer;
+      font-weight: bold;
+      user-select: none;
+      font-size: calc(10px * var(--zoom));
+    }
+    #minesweeper-field td.revealed {
+      background: #eee;
+    }
+    #minesweeper-field td.flag {
+      background: #f00;
+      color: #fff;
+    }
+    #minesweeper-field td.boom {
+      background: #f00;
+      color: #000;
+    }
+    #minesweeper-message {
+      text-align: center;
+      font-weight: bold;
+      margin-top: calc(6px * var(--zoom));
+      color: var(--text);
+      font-size: calc(10px * var(--zoom));
+    }
+    /* Todo App Styles */
+    #todo-list {
+      width: 100%;
+      max-width: calc(280px * var(--zoom));
+      margin: 0 auto;
+    }
+    #todo-input {
+      width: 100%;
+      padding: calc(6px * var(--zoom));
+      margin-bottom: calc(8px * var(--zoom));
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: calc(6px * var(--zoom));
+      color: var(--text);
+      font-size: calc(12px * var(--zoom));
+      outline: none;
+    }
+    #todo-input::placeholder {
+      color: rgba(230, 237, 243, 0.6);
+    }
+    .todo-item {
+      display: flex;
+      align-items: center;
+      padding: calc(6px * var(--zoom));
+      margin-bottom: calc(4px * var(--zoom));
+      background: var(--surface2);
+      border-radius: calc(6px * var(--zoom));
+      cursor: pointer;
+    }
+    .todo-item:hover {
+      background: var(--surface);
+    }
+    .todo-checkbox {
+      margin-right: calc(6px * var(--zoom));
+      cursor: pointer;
+    }
+    .todo-text {
+      flex: 1;
+      color: var(--text);
+      font-size: calc(12px * var(--zoom));
+    }
+    .todo-delete {
+      color: #ff6b6b;
+      cursor: pointer;
+      margin-left: calc(6px * var(--zoom));
+      font-size: calc(10px * var(--zoom));
+    }
+    .todo-completed .todo-text {
+      text-decoration: line-through;
+      opacity: 0.6;
+    }
+    /* Context Menu */
+    #context-menu,
+    #taskbar-context-menu {
+      position: absolute;
+      width: calc(140px * var(--zoom));
+      background: var(--window-bg);
+      backdrop-filter: blur(12px);
+      border-radius: calc(8px * var(--zoom));
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      display: none;
+      z-index: 10001;
+      overflow: hidden;
+    }
+    .context-item {
+      padding: calc(6px * var(--zoom)) calc(8px * var(--zoom));
+      cursor: pointer;
+      transition: 0.1s;
+      display: flex;
+      align-items: center;
+      gap: calc(6px * var(--zoom));
+      font-size: calc(11px * var(--zoom));
+    }
+    .context-item:hover {
+      background: var(--accent);
+      color: white;
+    }
+    .color-preview {
+      display: inline-block;
+      width: calc(12px * var(--zoom));
+      height: calc(12px * var(--zoom));
+      border-radius: 50%;
+      margin-left: auto;
+      border: 1px solid var(--border);
+    }
+    /* Weather Widget Styles */
+    #weather-info {
+      text-align: center;
+      padding: 20px;
+      font-family: 'Inter', sans-serif;
+    }
+    #weather-icon {
+      font-size: 48px;
+      margin: 10px 0;
+    }
+    #weather-temp {
+      font-size: 36px;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+    #weather-desc {
+      font-size: 14px;
+      opacity: 0.8;
+    }
+  </style>
+</head>
 <body>
+  <div id="desktop"></div>
+  <div id="context-menu">
+    <div class="context-item" onclick="document.getElementById('wallpaper-upload').click()">
+      <i class="fa-solid fa-image"></i> Change Wallpaper
+    </div>
+    <div class="context-item" onclick="zoomUI(0.1)">
+      <i class="fa-solid fa-magnifying-glass-plus"></i> Zoom In
+    </div>
+    <div class="context-item" onclick="zoomUI(-0.1)">
+      <i class="fa-solid fa-magnifying-glass-minus"></i> Zoom Out
+    </div>
+    <div class="context-item" onclick="zoomUI(0)">
+      <i class="fa-solid fa-magnifying-glass"></i> Reset Zoom
+    </div>
+  </div>
+  <div id="taskbar-context-menu">
+    <div class="context-item" onclick="setTaskbarStyle('default')">
+      <i class="fa-solid fa-grip-lines"></i> Default (Centered)
+    </div>
+    <div class="context-item" onclick="setTaskbarStyle('windows')">
+      <i class="fa-solid fa-grip-lines-vertical"></i> Windows (Full Width)
+    </div>
+    <div class="context-item" onclick="setAccentColor('blue')">
+      <i class="fa-solid fa-palette"></i> Blue
+      <span class="color-preview" style="background: var(--accent-blue);"></span>
+    </div>
+    <div class="context-item" onclick="setAccentColor('green')">
+      <i class="fa-solid fa-palette"></i> Green
+      <span class="color-preview" style="background: var(--accent-green);"></span>
+    </div>
+    <div class="context-item" onclick="setAccentColor('purple')">
+      <i class="fa-solid fa-palette"></i> Purple
+      <span class="color-preview" style="background: var(--accent-purple);"></span>
+    </div>
+    <div class="context-item" onclick="setAccentColor('orange')">
+      <i class="fa-solid fa-palette"></i> Orange
+      <span class="color-preview" style="background: var(--accent-orange);"></span>
+    </div>
+    <div class="context-item" onclick="setAccentColor('pink')">
+      <i class="fa-solid fa-palette"></i> Pink
+      <span class="color-preview" style="background: var(--accent-pink);"></span>
+    </div>
+    <div class="context-item" onclick="setAccentColor('dark-blue')">
+      <i class="fa-solid fa-palette"></i> Dark Blue
+      <span class="color-preview" style="background: var(--accent-dark-blue);"></span>
+    </div>
+    <div class="context-item" onclick="setAccentColor('dark-green')">
+      <i class="fa-solid fa-palette"></i> Dark Green
+      <span class="color-preview" style="background: var(--accent-dark-green);"></span>
+    </div>
+    <div class="context-item" onclick="setAccentColor('dark-purple')">
+      <i class="fa-solid fa-palette"></i> Dark Purple
+      <span class="color-preview" style="background: var(--accent-dark-purple);"></span>
+    </div>
+    <div class="context-item" onclick="setAccentColor('dark-red')">
+      <i class="fa-solid fa-palette"></i> Dark Red
+      <span class="color-preview" style="background: var(--accent-dark-red);"></span>
+    </div>
+    <div class="context-item" onclick="setAccentColor('dark-teal')">
+      <i class="fa-solid fa-palette"></i> Dark Teal
+      <span class="color-preview" style="background: var(--accent-dark-teal);"></span>
+    </div>
+  </div>
+  <input type="file" id="wallpaper-upload" accept="image/*" style="display: none;">
+  <div id="taskbar">
+    <div class="task-icon" id="about-btn" onclick="toggleApp('about')"><i class="fa-solid fa-circle-info"></i></div>
+    <div class="task-icon" id="explorer-btn" onclick="toggleApp('explorer')"><i class="fa-solid fa-folder-open"></i></div>
+    <div class="task-icon" id="terminal-btn" onclick="toggleApp('terminal')"><i class="fa-solid fa-terminal"></i></div>
+    <div class="task-icon" id="notepad-btn" onclick="toggleApp('notepad')"><i class="fa-solid fa-file-lines"></i></div>
+    <div class="task-icon" id="minesweeper-btn" onclick="toggleApp('minesweeper')"><i class="fa-solid fa-bomb"></i></div>
+    <div class="task-icon" id="calculator-btn" onclick="toggleApp('calculator')"><i class="fa-solid fa-calculator"></i></div>
+    <div class="task-icon" id="todo-btn" onclick="toggleApp('todo')"><i class="fa-solid fa-list-check"></i></div>
+    <div class="task-icon" id="weather-btn" onclick="toggleApp('weather')"><i class="fa-solid fa-cloud-sun"></i></div>
+    <div id="taskbar-clock">00:00:00</div>
+  </div>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.13.3/jquery-ui.min.js"></script>
+  <script>
+    // Set default wallpaper
+    const defaultWallpaper = 'https://images.unsplash.com/photo-1569428034239-f9565e32e224?q=80&w=2079&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
+    document.getElementById('desktop').style.backgroundImage = `url(${defaultWallpaper})`;
+    // Load saved wallpaper (if any)
+    const savedWallpaper = localStorage.getItem('cloudos_wallpaper');
+    if (savedWallpaper) {
+      document.getElementById('desktop').style.backgroundImage = `url(${savedWallpaper})`;
+    }
+    // Set default zoom level
+    let zoomLevel = parseFloat(localStorage.getItem('cloudos_zoom')) || 1;
+    document.documentElement.style.setProperty('--zoom', zoomLevel);
+    // Zoom UI function
+    function zoomUI(change) {
+      if (change === 0) {
+        zoomLevel = 1;
+      } else {
+        zoomLevel = Math.max(0.5, Math.min(2, zoomLevel + change));
+      }
+      document.documentElement.style.setProperty('--zoom', zoomLevel);
+      localStorage.setItem('cloudos_zoom', zoomLevel);
+      // Adjust all open windows
+      $('.window').each(function() {
+        const $win = $(this);
+        const left = parseFloat($win.css('left')) / zoomLevel;
+        const top = parseFloat($win.css('top')) / zoomLevel;
+        $win.css({
+          left: `${left * zoomLevel}px`,
+          top: `${top * zoomLevel}px`,
+          width: `${parseFloat($win.css('width')) * zoomLevel}px`,
+          height: `${parseFloat($win.css('height')) * zoomLevel}px`,
+        });
+      });
+    }
+    // Set taskbar style
+    function setTaskbarStyle(style) {
+      const taskbar = $('#taskbar');
+      if (style === 'windows') {
+        taskbar.addClass('windows');
+        localStorage.setItem('cloudos_taskbar_style', 'windows');
+      } else {
+        taskbar.removeClass('windows');
+        localStorage.removeItem('cloudos_taskbar_style');
+      }
+    }
+    // Load saved taskbar style
+    if (localStorage.getItem('cloudos_taskbar_style') === 'windows') {
+      setTaskbarStyle('windows');
+    }
+    // Set accent color
+    function setAccentColor(color) {
+      let accentVar;
+      switch (color) {
+        case 'blue':
+          accentVar = 'var(--accent-blue)';
+          break;
+        case 'green':
+          accentVar = 'var(--accent-green)';
+          break;
+        case 'purple':
+          accentVar = 'var(--accent-purple)';
+          break;
+        case 'orange':
+          accentVar = 'var(--accent-orange)';
+          break;
+        case 'pink':
+          accentVar = 'var(--accent-pink)';
+          break;
+        case 'dark-blue':
+          accentVar = 'var(--accent-dark-blue)';
+          break;
+        case 'dark-green':
+          accentVar = 'var(--accent-dark-green)';
+          break;
+        case 'dark-purple':
+          accentVar = 'var(--accent-dark-purple)';
+          break;
+        case 'dark-red':
+          accentVar = 'var(--accent-dark-red)';
+          break;
+        case 'dark-teal':
+          accentVar = 'var(--accent-dark-teal)';
+          break;
+        default:
+          accentVar = 'var(--accent-dark-blue)';
+      }
+      document.documentElement.style.setProperty('--accent', accentVar);
+      localStorage.setItem('cloudos_accent_color', color);
+    }
+    // Load saved accent color
+    const savedAccentColor = localStorage.getItem('cloudos_accent_color');
+    if (savedAccentColor) {
+      setAccentColor(savedAccentColor);
+    }
+    // Core window management
+    let windowCount = 0, highestZ = 1000, openWindows = {};
+    function bringToFront(w) {
+      highestZ++; w.css('z-index', highestZ);
+      $('.window').removeClass('active'); w.addClass('active');
+    }
+    function openWindow(title, content, icon = 'fa-cloud', appId = null) {
+      windowCount++; highestZ++;
+      const win = $(`
+        <div class="window active" style="width:calc(400px * var(--zoom));height:calc(320px * var(--zoom));left:${140+windowCount*40}px;top:${120+windowCount*40}px;z-index:${highestZ};">
+          <div class="titlebar">
+            <span><i class="fa-solid ${icon} titlebar-icon"></i>${title}</span>
+            <div class="titlebar-buttons">
+              <button class="minimize-btn"><i class="fa-solid fa-window-minimize"></i></button>
+              <button class="maximize-btn"><i class="fa-regular fa-window-maximize"></i></button>
+              <button class="close-btn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+          </div>
+          <div class="content">${content}</div>
+        </div>
+      `).appendTo('body')
+        .draggable({ handle: ".titlebar", containment: "parent" })
+        .resizable({
+          minWidth: 420,
+          minHeight: 320,
+          handles: 'n, e, s, w, ne, se, sw, nw',
+          resize: function(e, ui) {
+            // Optional: Add any resize logic here
+          }
+        });
+      // Double-click titlebar to maximize
+      win.find('.titlebar').on('dblclick', function(e) {
+        e.stopPropagation();
+        const btn = win.find('.maximize-btn');
+        if (win.hasClass('maximized')) {
+          win.removeClass('maximized')
+            .css({
+              width: win.data('w'),
+              height: win.data('h'),
+              top: win.data('t'),
+              left: win.data('l'),
+              'border-radius': '20px'
+            })
+            .resizable('enable');
+          btn.html('<i class="fa-regular fa-window-maximize"></i>');
+          if (appId) $(`#${appId}-btn`).removeClass('minimized');
+        } else {
+          win.data({
+            w: win.css('width'),
+            h: win.css('height'),
+            t: win.css('top'),
+            l: win.css('left')
+          })
+          .addClass('maximized')
+          .css({
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            'border-radius': 0
+          })
+          .resizable('disable');
+          btn.html('<i class="fa-solid fa-window-restore"></i>');
+          if (appId) $(`#${appId}-btn`).removeClass('minimized');
+        }
+      });
+      if (appId) { openWindows[appId] = win; $(`#${appId}-btn`).addClass('open'); }
+      win.on('mousedown', e => { if (!$(e.target).closest('.ui-resizable-handle').length) bringToFront(win); });
+      win.find('.minimize-btn').click(e => {
+        e.stopPropagation();
+        win.hide();
+        if (appId) {
+          $(`#${appId}-btn`).addClass('minimized');
+        }
+      });
+      win.find('.maximize-btn').click(function(e) {
+        e.stopPropagation();
+        const btn = $(this);
+        if (win.hasClass('maximized')) {
+          win.removeClass('maximized')
+            .css({
+              width: win.data('w'),
+              height: win.data('h'),
+              top: win.data('t'),
+              left: win.data('l'),
+              'border-radius': '20px'
+            })
+            .resizable('enable');
+          btn.html('<i class="fa-regular fa-window-maximize"></i>');
+          if (appId) $(`#${appId}-btn`).removeClass('minimized');
+        } else {
+          win.data({
+            w: win.css('width'),
+            h: win.css('height'),
+            t: win.css('top'),
+            l: win.css('left')
+          })
+          .addClass('maximized')
+          .css({
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            'border-radius': 0
+          })
+          .resizable('disable');
+          btn.html('<i class="fa-solid fa-window-restore"></i>');
+          if (appId) $(`#${appId}-btn`).removeClass('minimized');
+        }
+      });
+      win.find('.close-btn').click(e => {
+        e.stopPropagation();
+        win.remove();
+        if (appId) {
+          delete openWindows[appId];
+          $(`#${appId}-btn`).removeClass('open minimized');
+        }
+      });
+      return win;
+    }
+    // Clock
+    setInterval(() => {
+      $('#taskbar-clock').text(new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'}));
+    }, 1000);
+    // App Toggle
+    function toggleApp(id) {
+      if (openWindows[id]) {
+        const w = openWindows[id];
+        if (w.is(':hidden')) {
+          w.show();
+          $(`#${id}-btn`).removeClass('minimized');
+        }
+        bringToFront(w);
+      } else {
+        window['open' + id.charAt(0).toUpperCase() + id.slice(1)]?.();
+      }
+    }
+    // About App
+    function openAbout() {
+      const content = `
+        <div style="text-align: center; padding: 20px;">
+          <i class="fa-solid fa-cloud" style="font-size: 48px; margin-bottom: 16px; color: var(--accent);"></i>
+          <h2 style="margin-bottom: 8px;">Cloud OS</h2>
+          <p style="opacity: 0.8; margin-bottom: 16px;">Version 25.3</p>
+          <p style="font-size: 12px; opacity: 0.7; margin-bottom: 16px;">
+          A lightweight, web-based operating system simulator.<br>
+          Developed by <strong>Jonas Emil Sommer</strong>.
+        </p>
+        <div style="display: flex; justify-content: center; gap: 12px; margin-top: 20px;">
+         <a href="https://cloud.jonazzen.com/beta/" target="_blank" class="about-btn">
+    		Cloud OS 26 Beta 18
+         </a>
+         <a href="https://cloud.jonazzen.com/rebooted/" target="_blank" class="about-btn">
+    		Cloud OS Rebooted
+         </a>
+        </div>
+        </div>
+      `;
+      openWindow('About Cloud OS', content, 'fa-circle-info', 'about');
+    }
+    // ALL FULLY WORKING APPS
+    function openExplorer() {
+      const fs = {'/':['Documents','Pictures','Desktop','readme.txt'],'/Documents':['notes.txt','project.docx'],'/Pictures':['sunset.jpg','cloud.png'],'/Desktop':[]};
+      let path = '/';
+      function render() {
+        let h = path!=='/' ? `<div class="back-btn" onclick="back()"><i class="fa-solid fa-arrow-left"></i> Back</div>` : '';
+        h += `<h3 style="margin-bottom:20px;"><i class="fa-solid fa-folder-open"></i> ${path==='/'?'Root':path}</h3><hr style="border-top:1px solid var(--border);margin:20px 0;">`;
+        (fs[path]||[]).forEach(f => {
+          const folder = !f.includes('.');
+          h += `<div class="file-item" onclick="${folder?`go('${path==='/ '?'':path+'/'}${f}')`:'alert(\"Opening '+f+'\")'}">
+            <i class="fa-solid ${folder?'fa-folder':'fa-file'}"></i> ${f}
+          </div>`;
+        });
+        return h;
+      }
+      function go(p) { path = p; win.find('.content').html(render()); }
+      function back() { path = path.split('/').slice(0,-2).join('/')||'/'; win.find('.content').html(render()); }
+      const win = openWindow('File Explorer', render(), 'fa-folder-open', 'explorer');
+    }
+    function openTerminal() {
+      let hist = [], idx = -1;
+      const win = openWindow('Terminal', `<div id="t-out">Cloud OS Terminal<br>Type 'help'<br><br></div><div style="display:flex;"><span>$ </span><input id="t-in" style="flex:1;background:transparent;border:none;outline:none;color:var(--text);font-family:monospace;font-size:16px;" autocomplete="off"></div>`, 'fa-terminal', 'terminal');
+      const out = win.find('#t-out'), inp = win.find('#t-in'); inp.focus();
+      win.click(()=>inp.focus());
+      inp.keydown(e => {
+        if (e.key==='Enter') {
+          const cmd = inp.val().trim();
+          if(cmd){ hist.push(cmd); idx=hist.length; out.append(`$ ${cmd}<br>`);
+            if(cmd==='clear') out.empty();
+            else if(cmd==='help') out.append("clear, ls, date, whoami, echo [text]<br>");
+            else if(cmd==='ls') out.append("Documents Pictures Desktop readme.txt<br>");
+            else if(cmd==='date') out.append(new Date()+'<br>');
+            else if(cmd==='whoami') out.append("cloud-user<br>");
+            else if(cmd.startsWith('echo ')) out.append(cmd.slice(5)+'<br>');
+            else if(cmd) out.append(`<span style="color:#ff5555;">command not found: ${cmd}</span><br>`);
+          }
+          inp.val(''); out.scrollTop(out[0].scrollHeight);
+        }
+      });
+    }
+    function openCalculator() {
+      let disp='0';
+      const win = openWindow('Calculator', `<div class="calc-display">0</div><div class="calc-buttons">
+        ${['C','±','%','/','7','8','9','*','4','5','6','-','1','2','3','+','0','.','='].map(n=>`<div class="calc-btn${n==='0'?' zero':''}" onclick="calc('${n}')">${n}</div>`).join('')}
+      </div>`, 'fa-calculator', 'calculator');
+      window.calc = v => {
+        if(v==='C') disp='0';
+        else if(v==='=') disp = eval(disp) || 'Error';
+        else if(v==='±') disp = disp[0]==='-' ? disp.slice(1) : '-'+disp;
+        else disp = disp==='0'?v:disp+v;
+        win.find('.calc-display').text(disp);
+      };
+    }
+    function openNotepad() {
+      const win = openWindow('Notepad', `<textarea style="width:100%;height:100%;background:transparent;color:var(--text);border:none;outline:none;font-size:17px;padding:20px;resize:none;font-family:monospace;">Welcome to Cloud OS\n\nYour notes are saved automatically.</textarea>`, 'fa-file-lines', 'notepad');
+      setTimeout(()=>{
+        const t = win.find('textarea');
+        t.val(localStorage.getItem('cloudos_notepad')||t.val());
+        t.on('input',()=>localStorage.setItem('cloudos_notepad',t.val()));
+      },100);
+    }
+    function openMinesweeper() {
+      const win = openWindow('Minesweeper', `
+        <div id="minesweeper-controls">
+          <div id="minesweeper-mines">010</div>
+          <div id="minesweeper-face" onclick="resetMinesweeper()">😊</div>
+          <div id="minesweeper-time">000</div>
+        </div>
+        <div id="minesweeper-message"></div>
+        <table id="minesweeper-field"></table>
+      `, 'fa-bomb', 'minesweeper');
+      const rows = 9, cols = 9, mines = 10;
+      let board = [], revealed = 0, flags = 0, gameOver = false, time = 0, timer;
+      // Initialize the game
+      initGame();
+      function initGame() {
+        board = [];
+        revealed = 0;
+        flags = 0;
+        gameOver = false;
+        time = 0;
+        clearInterval(timer);
+        $('#minesweeper-time').text('000');
+        $('#minesweeper-face').text('😊');
+        $('#minesweeper-message').text('');
+        $('#minesweeper-field').empty();
+        // Create board
+        for (let i = 0; i < rows; i++) {
+          board[i] = [];
+          for (let j = 0; j < cols; j++) {
+            board[i][j] = { mine: false, revealed: false, flag: false, adj: 0 };
+          }
+        }
+        // Place mines
+        let minesPlaced = 0;
+        while (minesPlaced < mines) {
+          const x = Math.floor(Math.random() * rows);
+          const y = Math.floor(Math.random() * cols);
+          if (!board[x][y].mine) {
+            board[x][y].mine = true;
+            minesPlaced++;
+          }
+        }
+        // Calculate adjacent mines
+        for (let i = 0; i < rows; i++) {
+          for (let j = 0; j < cols; j++) {
+            if (!board[i][j].mine) {
+              let count = 0;
+              for (let a = -1; a <= 1; a++) {
+                for (let b = -1; b <= 1; b++) {
+                  if (a === 0 && b === 0) continue;
+                  const x = i + a, y = j + b;
+                  if (x >= 0 && x < rows && y >= 0 && y < cols && board[x][y].mine) {
+                    count++;
+                  }
+                }
+              }
+              board[i][j].adj = count;
+            }
+          }
+        }
+        // Render the board
+        renderBoard();
+        timer = setInterval(() => {
+          time++;
+          $('#minesweeper-time').text(String(time).padStart(3, '0'));
+        }, 1000);
+      }
+      function renderBoard() {
+        const $field = $('#minesweeper-field');
+        $field.empty();
+        for (let i = 0; i < rows; i++) {
+          const $row = $('<tr>');
+          for (let j = 0; j < cols; j++) {
+            const $cell = $('<td>')
+              .attr('data-x', i)
+              .attr('data-y', j)
+              .on('click', () => revealCell(i, j))
+              .on('contextmenu', (e) => {
+                e.preventDefault();
+                flagCell(i, j);
+              });
+            $row.append($cell);
+          }
+          $field.append($row);
+        }
+        updateMinesCounter();
+      }
+      function revealCell(x, y) {
+        if (gameOver || board[x][y].revealed || board[x][y].flag) return;
+        board[x][y].revealed = true;
+        revealed++;
+        const $cell = $(`#minesweeper-field td[data-x="${x}"][data-y="${y}"]`);
+        $cell.addClass('revealed');
+        if (board[x][y].mine) {
+          $cell.text('💣').css('color', 'black').css('background', 'red');
+          gameOver = true;
+          clearInterval(timer);
+          $('#minesweeper-face').text('😢');
+          $('#minesweeper-message').text('Game Over!').css('color', 'red');
+          revealAllMines();
+          return;
+        }
+        if (board[x][y].adj > 0) {
+          $cell.text(board[x][y].adj);
+          if (board[x][y].adj === 1) $cell.css('color', 'blue');
+          else if (board[x][y].adj === 2) $cell.css('color', 'green');
+          else if (board[x][y].adj === 3) $cell.css('color', 'red');
+          else if (board[x][y].adj >= 4) $cell.css('color', 'purple');
+        } else {
+          // Reveal adjacent cells if empty
+          for (let a = -1; a <= 1; a++) {
+            for (let b = -1; b <= 1; b++) {
+              if (a === 0 && b === 0) continue;
+              const nx = x + a, ny = y + b;
+              if (nx >= 0 && nx < rows && ny >= 0 && ny < cols && !board[nx][ny].revealed) {
+                revealCell(nx, ny);
+              }
+            }
+          }
+        }
+        if (revealed === rows * cols - mines) {
+          gameOver = true;
+          clearInterval(timer);
+          $('#minesweeper-face').text('😎');
+          $('#minesweeper-message').text('You Win!').css('color', 'green');
+        }
+      }
+      function flagCell(x, y) {
+        if (gameOver || board[x][y].revealed) return;
+        board[x][y].flag = !board[x][y].flag;
+        const $cell = $(`#minesweeper-field td[data-x="${x}"][data-y="${y}"]`);
+        $cell.toggleClass('flag', board[x][y].flag);
+        flags += board[x][y].flag ? 1 : -1;
+        updateMinesCounter();
+      }
+      function updateMinesCounter() {
+        $('#minesweeper-mines').text(String(mines - flags).padStart(3, '0'));
+      }
+      function revealAllMines() {
+        for (let i = 0; i < rows; i++) {
+          for (let j = 0; j < cols; j++) {
+            if (board[i][j].mine) {
+              const $cell = $(`#minesweeper-field td[data-x="${i}"][data-y="${j}"]`);
+              $cell.addClass('revealed').text('💣').css('background', 'red');
+            }
+          }
+        }
+      }
+      function resetMinesweeper() {
+        initGame();
+      }
+      window.resetMinesweeper = resetMinesweeper;
+    }
+    function openTodo() {
+      const win = openWindow('Todo', `
+        <div id="todo-list">
+          <input type="text" id="todo-input" placeholder="Add a new task...">
+          <div id="todo-items"></div>
+        </div>
+      `, 'fa-list-check', 'todo');
+      const $input = win.find('#todo-input');
+      const $items = win.find('#todo-items');
+      // Load saved todos
+      const todos = JSON.parse(localStorage.getItem('cloudos_todos')) || [];
+      renderTodos();
+      $input.on('keypress', function(e) {
+        if (e.which === 13) {
+          const text = $input.val().trim();
+          if (text) {
+            todos.push({ text, completed: false });
+            saveTodos();
+            renderTodos();
+            $input.val('');
+          }
+        }
+      });
+      function renderTodos() {
+        $items.empty();
+        todos.forEach((todo, index) => {
+          const $item = $(`
+            <div class="todo-item ${todo.completed ? 'todo-completed' : ''}">
+              <input type="checkbox" class="todo-checkbox" ${todo.completed ? 'checked' : ''} data-index="${index}">
+              <span class="todo-text">${todo.text}</span>
+              <i class="fa-solid fa-trash todo-delete" data-index="${index}"></i>
+            </div>
+          `);
+          $items.append($item);
+        });
+        // Add event listeners
+        $items.find('.todo-checkbox').on('change', function() {
+          const index = $(this).data('index');
+          todos[index].completed = $(this).is(':checked');
+          saveTodos();
+          renderTodos();
+        });
+        $items.find('.todo-delete').on('click', function() {
+          const index = $(this).data('index');
+          todos.splice(index, 1);
+          saveTodos();
+          renderTodos();
+        });
+      }
+      function saveTodos() {
+        localStorage.setItem('cloudos_todos', JSON.stringify(todos));
+      }
+    }
+    // Weather Widget Function
+    function openWeather() {
+      const win = openWindow('Weather', `
+        <div id="weather-info">
+          <h3 id="weather-location">Copenhagen</h3>
+          <div id="weather-icon">☀️</div>
+          <div id="weather-temp">--°C</div>
+          <div id="weather-desc">Loading...</div>
+        </div>
+      `, 'fa-cloud-sun', 'weather');
+
+      // Fetch weather data
+      fetchWeather('Copenhagen');
+    }
+
+    async function fetchWeather(location) {
+      const apiKey = '56d2687c2f6e7596f96b68b31aa5ef42'; // Replace with your OpenWeatherMap API key
+      const url = `https://api.openweathermap.org/data/2.5/weather?q=${location}&units=metric&appid=${apiKey}`;
+
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (data.cod === 200) {
+          const temp = Math.round(data.main.temp);
+          const desc = data.weather[0].description;
+          const icon = getWeatherIcon(data.weather[0].icon);
+
+          $('#weather-location').text(location);
+          $('#weather-icon').html(icon);
+          $('#weather-temp').text(`${temp}°C`);
+          $('#weather-desc').text(desc);
+        } else {
+          $('#weather-desc').text('Failed to fetch weather.');
+        }
+      } catch (error) {
+        $('#weather-desc').text('Error fetching weather.');
+      }
+    }
+
+    function getWeatherIcon(iconCode) {
+      const icons = {
+        '01d': '☀️', '01n': '🌙',
+        '02d': '⛅', '02n': '🌥️',
+        '03d': '☁️', '03n': '☁️',
+        '04d': '☁️', '04n': '☁️',
+        '09d': '🌧️', '09n': '🌧️',
+        '10d': '🌦️', '10n': '🌦️',
+        '11d': '⛈️', '11n': '⛈️',
+        '13d': '❄️', '13n': '❄️',
+        '50d': '🌫️', '50n': '🌫️',
+      };
+      return icons[iconCode] || '☁️';
+    }
+    // Right-click context menu
+    document.getElementById('desktop').addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      const menu = document.getElementById('context-menu');
+      menu.style.display = 'block';
+      menu.style.left = `${e.clientX}px`;
+      menu.style.top = `${e.clientY}px`;
+    });
+    // Taskbar Context Menu
+    document.getElementById('taskbar').addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      const menu = document.getElementById('taskbar-context-menu');
+      menu.style.display = 'block';
+      menu.style.left = `${e.clientX}px`;
+      menu.style.top = `${e.clientY - menu.offsetHeight}px`;
+    });
+    document.addEventListener('click', () => {
+      document.getElementById('context-menu').style.display = 'none';
+      document.getElementById('taskbar-context-menu').style.display = 'none';
+    });
+    // Wallpaper upload
+    document.getElementById('wallpaper-upload').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          document.getElementById('desktop').style.backgroundImage = `url(${event.target.result})`;
+          localStorage.setItem('cloudos_wallpaper', event.target.result);
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  </script>
 </body>
 </html>
